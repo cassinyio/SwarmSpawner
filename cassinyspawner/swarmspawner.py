@@ -285,9 +285,7 @@ class SwarmSpawner(Spawner):
                 self.server_name = user_options['name']
                     
             if hasattr(self, 'container_spec') and self.container_spec is not None:
-                
                 container_spec = dict(**self.container_spec)
-                self.log.warn("inside has attr")
             elif user_options == {}:
                 raise("A container_spec is needed in order to create a service")
             

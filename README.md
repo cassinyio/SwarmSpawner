@@ -59,8 +59,6 @@ To control the creation of the services you have 2 ways, using _jupyterhub_confi
 
 Remember that at the end you are just using the [Docker Engine API](https://docs.docker.com/engine/api/).
 
-(https://docs.docker.com/engine/reference/commandline/service_create/#/specify-service-constraints---constraint)
-
 ### Use a configuration inside jupyterhub_config.py
 You can define *container_spec*, *resource_spec* and _networks_ within jupyterhub_config.py.
 
@@ -193,11 +191,9 @@ You can use all the docker images built for [JupyterHub](https://github.com/jupy
 
 ## Contributing
 
-If you would like to contribute to the project, please read our 
-[contributor documentation](http://jupyter.readthedocs.io/en/latest/contributor/content-contributor.html)
-and the [`CONTRIBUTING.md`](CONTRIBUTING.md).
+If you would like to contribute to the project, please read [contributor documentation](http://jupyter.readthedocs.io/en/latest/contributor/content-contributor.html).
 
-For a **development install**, clone the [repository](https://github.com/jupyterhub/dockerspawner) 
+For a **development install**, clone the [repository](https://github.com/cassiny/SwarmSpawner) 
 and then install from source:
 
 ```bash
@@ -205,6 +201,9 @@ git clone https://github.com/cassiny/SwarmSpawner
 cd SwarmSpawner
 pip3 install -r dev-requirements.txt -e .
 ```
+## Credit
+
+[DockerSpawner](https://github.com/jupyterhub/dockerspawner)
 
 ## License
 
