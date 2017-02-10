@@ -1,5 +1,6 @@
 """
-A Spawner for JupyterHub that runs each user's server in a separate Docker Service
+A Spawner for JupyterHub that runs each user's
+server in a separate Docker Service
 """
 
 import os
@@ -21,20 +22,24 @@ from traitlets import (
     List,
     Bool,
     Int,
-    Any,
-    default
 )
+
 
 class UnicodeOrFalse(Unicode):
     info_text = 'a unicode string or False'
+
     def validate(self, obj, value):
         if value is False:
             return value
         return super(UnicodeOrFalse, self).validate(obj, value)
 
+
 class SwarmSpawner(Spawner):
+    """A Spawner for JupyterHub using Docker Engine in Swarm mode
+    """
 
     _executor = None
+
     @property
     def executor(self, max_workers=None):
         """single global executor"""
@@ -44,6 +49,7 @@ class SwarmSpawner(Spawner):
         return cls._executor
 
     _client = None
+
     @property
     def client(self):
         """single global client instance"""
@@ -67,7 +73,10 @@ class SwarmSpawner(Spawner):
                     tls_config = None
 
                 docker_host = os.environ.get('DOCKER_HOST', 'unix://var/run/docker.sock')
-                client = docker.APIClient(base_url=docker_host, tls=tls_config, version='auto')
+
+                client = docker.APIClient(base_url=docker_host,
+                                          tls=tls_config,
+                                          version='auto')
             cls._client = client
         return cls._client
 
@@ -85,33 +94,30 @@ class SwarmSpawner(Spawner):
         )
     )
 
-    use_docker_client_env = Bool(False, config=True, help="If True, will use Docker client env variable (boot2docker friendly)")
+    use_docker_client_env = Bool(False, config=True,
+                                 help="If True, will use Docker client env \
+                                 variable (boot2docker friendly)")
     tls = Bool(False, config=True, help="If True, connect to docker with --tls")
     tls_verify = Bool(False, config=True, help="If True, connect to docker with --tlsverify")
     tls_ca = Unicode("", config=True, help="Path to CA certificate for docker TLS")
     tls_cert = Unicode("", config=True, help="Path to client certificate for docker TLS")
     tls_key = Unicode("", config=True, help="Path to client key for docker TLS")
-    tls_assert_hostname = UnicodeOrFalse(default_value=None, allow_none=True,
-        config=True,
-        help="If False, do not verify hostname of docker daemon",
-    )
+    tls_assert_hostname = UnicodeOrFalse(default_value=None,
+                                         allow_none=True,
+                                         config=True,
+                                         help="If False, do not verify hostname of docker daemon",)
 
     container_spec = Dict({}, config=True, help="Params to create the service")
     resource_spec = Dict({}, config=True, help="Params about cpu and memory limits")
     networks = List([], config=True, help="Additional args to create_host_config for service create")
-    
+
     _docker_safe_chars = set(string.ascii_letters + string.digits + '-')
     _docker_escape_char = '_'
-    
+
     use_user_options = Bool(False, config=True, help="the spawner will use the dict passed through the form or as json body when using the Hub Api")
     jupyterhub_service_name = Unicode(config=True,
-        help=dedent(
-            """
-            Name of the service running the JupyterHub
-            """
-        )
-    )
-    
+                                      help=dedent("""Name of the service running the JupyterHub"""))
+
     @property
     def tls_client(self):
         """A tuple consisting of the TLS client certificate and key if they
@@ -123,6 +129,7 @@ class SwarmSpawner(Spawner):
         return None
 
     _service_owner = None
+
     @property
     def service_owner(self):
         if self._service_owner is None:
@@ -135,7 +142,7 @@ class SwarmSpawner(Spawner):
     def service_name(self):
         """
         Service name inside the Docker Swarm
-        
+
         service_suffix should be a numerical value unique for user
         {service_prefix}-{service_owner}-{service_suffix}
         """
@@ -145,7 +152,11 @@ class SwarmSpawner(Spawner):
             server_name = self.server_name
         else:
             server_name = 1
-        return "{}-{}-{}".format(self.service_prefix, self.service_owner, server_name)
+
+        return "{}-{}-{}".format(self.service_prefix,
+                                 self.service_owner,
+                                 server_name
+                                )
 
     def load_state(self, state):
         super().load_state(state)
@@ -161,14 +172,14 @@ class SwarmSpawner(Spawner):
         """it's called in traitlets. It's a special method name.
         Don't inherit any env from the parent process"""
         return []
-    
+
     def _public_hub_api_url(self):
         proto, path = self.hub.api_url.split('://', 1)
-        ip, rest = path.split(':', 1)
+        _, rest = path.split(':', 1)
         return '{proto}://{name}:{rest}'.format(
-            proto = proto,
-            name = self.jupyterhub_service_name,
-            rest = rest
+            proto=proto,
+            name=self.jupyterhub_service_name,
+            rest=rest
         )
 
     def get_env(self):
@@ -182,7 +193,7 @@ class SwarmSpawner(Spawner):
 
         if self.notebook_dir:
             env['NOTEBOOK_DIR'] = self.notebook_dir
-        
+
         env['JPY_HUB_API_URL'] = self._public_hub_api_url()
 
         return env
@@ -209,17 +220,16 @@ class SwarmSpawner(Spawner):
         if not service:
             self.log.warn("Service not found")
             return ""
-        
+
         task_filter = {'service': service['Spec']['Name']}
-        
-        
+
         task = yield self.docker(
             'tasks', task_filter
         )
 
         # use the first task and only task
         task = task[0]
-        
+
         task_state = task['Status']['State']
         self.log.debug(
             "Task %s of Service %s status: %s",
@@ -245,13 +255,13 @@ class SwarmSpawner(Spawner):
                 'inspect_service', self.service_name
             )
             self.service_id = service['ID']
-        except APIError as e:
-            if e.response.status_code == 404:
+        except APIError as err:
+            if err.response.status_code == 404:
                 self.log.info("Service '%s' is gone", self.service_name)
                 service = None
                 # Docker service is gone, remove service id
                 self.service_id = ''
-            elif e.response.status_code == 500:
+            elif err.response.status_code == 500:
                 self.log.info("Docker Swarm Server error")
                 service = None
                 # Docker service is unhealthy, remove the service_id
@@ -263,74 +273,73 @@ class SwarmSpawner(Spawner):
     @gen.coroutine
     def start(self):
         """Start the single-user server in a docker service.
-        
         You can specify the params for the service through jupyterhub_config.py
         or using the user_options
         """
-        
         if self.use_user_options:
             user_options = self.user_options
-            
+
         else:
             user_options = {}
-        
+
         self.log.warn("self.use_user_options:".format(self.use_user_options))
         self.log.warn(user_options)
-        
+
         service = yield self.get_service()
-        
+
         if service is None:
-            
+
             if 'name' in user_options:
                 self.server_name = user_options['name']
-                    
+
             if hasattr(self, 'container_spec') and self.container_spec is not None:
                 container_spec = dict(**self.container_spec)
             elif user_options == {}:
-                raise("A container_spec is needed in order to create a service")
-            
+                raise("A container_spec is needed in to create a service")
+
             container_spec.update(user_options.get('container_spec', {}))
-            
-            # iterates over mounts to create a new mounts list of docker.types.Mount
+
+            # iterates over mounts to create
+            # a new mounts list of docker.types.Mount
             container_spec['mounts'] = []
             for mount in self.container_spec['mounts']:
                 m = dict(**mount)
                 if m['type'] == 'volume' and 'source' in m:
                     m['source'] = m['source'].format(username=self.service_owner)
                 container_spec['mounts'].append(docker.types.Mount(**m))
-            
+
             # some Envs are required by the single-user-image
             container_spec['env'] = self.get_env()
-            
+
             if hasattr(self, 'resource_spec'):
                 resource_spec = self.resource_spec
             resource_spec.update(user_options.get('resource_spec', {}))
-            
+
             if hasattr(self, 'networks'):
                 networks = self.networks
             if user_options.get('networks') is not None:
                 networks = user_options.get('networks')
-        
+
             image = container_spec['Image']
             del container_spec['Image']
-            
-            name = self.service_name ####
-            
+
             # create the service
             container_spec = docker.types.ContainerSpec(image, **container_spec)
             resources = docker.types.Resources(**resource_spec)
-            
-            task_spec = {
-                    'container_spec': container_spec,
-                    'resources': resources,
-                    'placement': user_options.get('placement')
-            }       
+
+            task_spec = {'container_spec': container_spec,
+                         'resources': resources,
+                         'placement': user_options.get('placement')
+                         }
             task_tmpl = docker.types.TaskTemplate(**task_spec)
-            
-            resp = yield self.docker('create_service', task_tmpl, name=self.service_name, networks=networks)
-            
+
+            resp = yield self.docker('create_service',
+                                     task_tmpl,
+                                     name=self.service_name,
+                                     networks=networks)
+
             self.service_id = resp['ID']
-                
+
             self.log.info(
                 "Created service '%s' (id: %s) from image %s",
                 self.service_name, self.service_id[:7], image)
@@ -346,10 +355,10 @@ class SwarmSpawner(Spawner):
                 if line.startswith('JPY_API_TOKEN='):
                     self.api_token = line.split('=', 1)[1]
                     break
-        
+
         ip = self.service_name
         port = self.service_port
-        
+
         # we use service_name instead of ip
         # https://docs.docker.com/engine/swarm/networking/#use-swarm-mode-service-discovery
         # service_port is actually equal to 8888
@@ -360,8 +369,6 @@ class SwarmSpawner(Spawner):
         """Stop and remove the service
 
         Consider using stop/start when Docker adds support
-        
-        
         """
         self.log.info(
             "Stopping and removing service %s (id: %s)",
