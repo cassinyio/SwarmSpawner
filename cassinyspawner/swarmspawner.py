@@ -41,7 +41,7 @@ class SwarmSpawner(Spawner):
     _executor = None
 
     @property
-    def executor(self, max_workers=None):
+    def executor(self, max_workers=1):
         """single global executor"""
         cls = self.__class__
         if cls._executor is None:
