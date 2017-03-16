@@ -129,9 +129,9 @@ You can also specify some resource for each service
 ```python
 c.SwarmSpawner.resource_spec = {
                 'cpu_limit' : 1, # (int) – CPU limit in units of 10^9 CPU shares.
-                'mem_limit' : 512 * 1e6, # (int) – Memory limit in Bytes.
+                'mem_limit' : int(512 * 1e6), # (int) – Memory limit in Bytes.
                 'cpu_reservation' : 1000, # (int) – CPU reservation in units of 10^9 CPU shares.
-                'mem_reservation' : 512 * 1e6, # (int) – Memory reservation in Bytes
+                'mem_reservation' : int(512 * 1e6), # (int) – Memory reservation in Bytes
                 }
 ```
 
@@ -159,9 +159,9 @@ user_options = {
               'mounts' : mounts, # Same as jupyterhub_config 
   'resource_spec' : {
               'cpu_limit' : 1, # (int) – CPU limit in units of 10^9 CPU shares.
-              'mem_limit' : 512 * 1e6,# (int) – Memory limit in Bytes.
+              'mem_limit' : int(512 * 1e6),# (int) – Memory limit in Bytes.
               'cpu_reservation' : 1000, # (int) – CPU reservation in units of 10^9 CPU shares.
-              'mem_reservation' : 512 * 1e6, # (int) – Memory reservation in Bytes
+              'mem_reservation' : int(512 * 1e6), # (int) – Memory reservation in Bytes
       },
       'placement' : [], #list of constrains
       'network' : [], #list of networks
