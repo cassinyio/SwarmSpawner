@@ -148,9 +148,8 @@ class SwarmSpawner(Spawner):
         """
         # JupyterHub with multi-server-per-user should pass server_name
         # In the future we can remove this part
-        if hasattr(self, 'server_name'):
-            server_name = self.server_name
-        else:
+        server_name = getattr(self, "server_name", None)
+        if server_name is None:
             server_name = 1
 
         return "{}-{}-{}".format(self.service_prefix,
@@ -282,8 +281,7 @@ class SwarmSpawner(Spawner):
         else:
             user_options = {}
 
-        self.log.warn("self.use_user_options:".format(self.use_user_options))
-        self.log.warn(user_options)
+        self.log.warn("user_options: ".format(user_options))
 
         service = yield self.get_service()
 
