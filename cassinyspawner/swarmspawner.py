@@ -225,12 +225,12 @@ class SwarmSpawner(Spawner):
             'tasks', task_filter
         )
 
-        # use the first task and only task
+        # use the first and only task
         task = task[0]
 
         task_state = task['Status']['State']
         self.log.debug(
-            "Task %s of Service %s status: %s",
+            "Task %s of Docker service %s status: %s",
             task['ID'][:7],
             self.service_id[:7],
             pformat(task_state),
@@ -239,11 +239,7 @@ class SwarmSpawner(Spawner):
         if task_state == 'running':
             return None
         else:
-            return (
-                "ExitCode={ExitCode}, "
-                "Error='{Error}', "
-                "FinishedAt={FinishedAt}".format(**task_state)
-            )
+            return 1
 
     @gen.coroutine
     def get_service(self):
