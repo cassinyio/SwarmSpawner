@@ -36,7 +36,7 @@ python setup.py install
 Docker Engine in Swarm mode and the related services work in a different way compared to Docker containers.
 
 
-Tell JupyterHub to use SwarmSpawner by adding the following line to 
+Tell JupyterHub to use SwarmSpawner by adding the following lines to 
 your `jupyterhub_config.py`:
 
 ```python
@@ -47,17 +47,18 @@ c.JupyterHub.spawner_class = 'cassinyspawner.SwarmSpawner'
 c.JupyterHub.hub_ip = '0.0.0.0'
 c.SwarmSpawner.jupyterhub_service_name = 'NameOfTheService'
 ```
-There is the possibility to set parameters using `user_options`
+What is `jupyterhub_service_name`?
 
+Inside a Docker engine in Swarm mode the services use a `name` instead of a `ip` to communicate with each other.
+'jupyterhub_service_name' is the name of ther service for the JupyterHub.
+
+### Networks
+It's important to put the JupyterHub service (also the proxy) and the services that are running jupyter notebook inside the same network, otherwise they couldn't reach each other.
+SwarmSpawner use the service's name instead of the service's ip, as a consequence JupyterHub and servers should share the same overlay network (network across nodes).
 
 ```python
-# To use user_options in service creation
-c.SwarmSpawner.use_user_options = False
+c.SwarmSpawner.networks = ["mynetwork"] #list of networks
 ```
-
-To control the creation of the services you have 2 ways, using _jupyterhub_config.py_ or _user_options_.
-
-Remember that at the end you are just using the [Docker Engine API](https://docs.docker.com/engine/api/).
 
 ### Use a configuration inside jupyterhub_config.py
 You can define *container_spec*, *resource_spec* and _networks_ within jupyterhub_config.py.
@@ -84,7 +85,7 @@ With mounts your are going to mount a local directory of the host inside the con
 <u>Remember that source should exist in the node where you are creating the service.</u>
 
 ```python
-notebook_dir = os.environ.get('DOCKER_NOTEBOOK_DIR') or '/home/jovyan/work'
+notebook_dir = os.environ.get('NOTEBOOK_DIR') or '/home/jovyan/work'
 c.SwarmSpawner.notebook_dir = notebook_dir
 ```
 
@@ -135,15 +136,17 @@ c.SwarmSpawner.resource_spec = {
                 }
 ```
 
-#### Networks
-You can also specify a network, remember to create the network before creating the service.
-SwarmSpawner use the service name instead of the service ip as a consequence JupyterHub and servers should share the same overlay network (network across nodes).
+### Using user_options
 
+There is the possibility to set parameters using `user_options`
 ```python
-c.SwarmSpawner.networks = ["mynetwork"] #list of networks
+# To use user_options in service creation
+c.SwarmSpawner.use_user_options = False
 ```
 
-### Using user_options
+To control the creation of the services you have 2 ways, using _jupyterhub_config.py_ or _user_options_.
+
+Remember that at the end you are just using the [Docker Engine API](https://docs.docker.com/engine/api/).
 
 **user_options, if used, will overwrite jupyter_config.py for services.**
 
@@ -168,9 +171,9 @@ user_options = {
       'name' : '' # Name of service
 ```
 
-### Services Prefix
+### Names of the Jupyter notebook service inside Docker engine in Swarm mode
 
-Services using this format `{service_prefix}-{service_owner}-{service_suffix}`
+We JupyterHub spawns a new Jupyter notebook server the name of the service will be `{service_prefix}-{service_owner}-{service_suffix}`
 
 You can change the service_prefix in this way:
 
@@ -181,7 +184,7 @@ c.SwarmSpawner.service_prefix = "jupyterhub"
 
 `service_owner` is the hexdigest() of the hashed `user.name`.
 
-In case of multi sigle-server per user `service_suffix` is the name of the server, otherwise is always 1.
+In case of named servers (more than one server for user) `service_suffix` is the name of the server, otherwise is always 1.
 
 ### Downloading images
 Docker Engine in Swarm mode downloads images automatically from the repository.
