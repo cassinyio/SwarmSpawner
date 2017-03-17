@@ -146,11 +146,11 @@ class SwarmSpawner(Spawner):
         service_suffix should be a numerical value unique for user
         {service_prefix}-{service_owner}-{service_suffix}
         """
-        
-        if self.server_name == '':
-            server_name = 1
-        else:
+
+        if self.server_name:
             server_name = self.server_name
+        else:
+            server_name = 1
 
         return "{}-{}-{}".format(self.service_prefix,
                                  self.service_owner,
