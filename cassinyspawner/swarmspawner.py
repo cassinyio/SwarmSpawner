@@ -146,11 +146,11 @@ class SwarmSpawner(Spawner):
         service_suffix should be a numerical value unique for user
         {service_prefix}-{service_owner}-{service_suffix}
         """
-        # JupyterHub with multi-server-per-user should pass server_name
-        # In the future we can remove this part
-        server_name = getattr(self, "server_name", None)
-        if server_name is None:
+        
+        if self.server_name == '':
             server_name = 1
+        else:
+            server_name = self.server_name
 
         return "{}-{}-{}".format(self.service_prefix,
                                  self.service_owner,
@@ -275,9 +275,11 @@ class SwarmSpawner(Spawner):
         You can specify the params for the service through jupyterhub_config.py
         or using the user_options
         """
+
+        # https://github.com/jupyterhub/jupyterhub/blob/master/jupyterhub/user.py#L202
+        # By default jupyterhub calls the spawner passing user_options
         if self.use_user_options:
             user_options = self.user_options
-
         else:
             user_options = {}
 
