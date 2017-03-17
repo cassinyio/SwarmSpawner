@@ -146,8 +146,7 @@ class SwarmSpawner(Spawner):
         service_suffix should be a numerical value unique for user
         {service_prefix}-{service_owner}-{service_suffix}
         """
-
-        if self.server_name:
+        if hasattr(self, "server_name") and self.server_name:
             server_name = self.server_name
         else:
             server_name = 1
@@ -217,8 +216,8 @@ class SwarmSpawner(Spawner):
         """Check for a task state like `docker service ps id`"""
         service = yield self.get_service()
         if not service:
-            self.log.warn("Service not found")
-            return ""
+            self.log.warn("Docker service not found")
+            return 0
 
         task_filter = {'service': service['Spec']['Name']}
 
@@ -248,7 +247,7 @@ class SwarmSpawner(Spawner):
 
     @gen.coroutine
     def get_service(self):
-        self.log.debug("Getting service '%s'", self.service_name)
+        self.log.debug("Getting Docker service '%s'", self.service_name)
         try:
             service = yield self.docker(
                 'inspect_service', self.service_name
@@ -256,7 +255,7 @@ class SwarmSpawner(Spawner):
             self.service_id = service['ID']
         except APIError as err:
             if err.response.status_code == 404:
-                self.log.info("Service '%s' is gone", self.service_name)
+                self.log.info("Docker service '%s' is gone", self.service_name)
                 service = None
                 # Docker service is gone, remove service id
                 self.service_id = ''
@@ -341,12 +340,12 @@ class SwarmSpawner(Spawner):
             self.service_id = resp['ID']
 
             self.log.info(
-                "Created service '%s' (id: %s) from image %s",
+                "Created Docker service '%s' (id: %s) from image %s",
                 self.service_name, self.service_id[:7], image)
 
         else:
             self.log.info(
-                "Found existing service '%s' (id: %s)",
+                "Found existing Docker service '%s' (id: %s)",
                 self.service_name, self.service_id[:7])
             # Handle re-using API token.
             # Get the API token from the environment variables
@@ -371,11 +370,11 @@ class SwarmSpawner(Spawner):
         Consider using stop/start when Docker adds support
         """
         self.log.info(
-            "Stopping and removing service %s (id: %s)",
+            "Stopping and removing Docker service %s (id: %s)",
             self.service_name, self.service_id[:7])
         yield self.docker('remove_service', self.service_id[:7])
         self.log.info(
-            "Service removed %s (id: %s)",
+            "Docker service %s (id: %s) removed",
             self.service_name, self.service_id[:7])
 
         self.clear_state()
