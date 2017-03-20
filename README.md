@@ -62,7 +62,7 @@ SwarmSpawner use the service's name instead of the service's ip, as a consequenc
 c.SwarmSpawner.networks = ["mynetwork"] #list of networks
 ```
 
-### Use a configuration inside jupyterhub_config.py
+### Define the services inside jupyterhub_config.py
 You can define *container_spec*, *resource_spec* and _networks_ within jupyterhub_config.py.
 
 #### [Container_spec](https://github.com/docker/docker-py/blob/master/docs/user_guides/swarm_services.md)
