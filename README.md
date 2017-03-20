@@ -31,6 +31,8 @@ python setup.py install
 
 ## Configuration
 
+You can find an example jupyter_config.py inside [examples](/examples)
+
 ### SwarmSpawner
 
 Docker Engine in Swarm mode and the related services work in a different way compared to Docker containers.
@@ -71,7 +73,7 @@ If you are using a specific image, well it's up to you to specify the right comm
 
 ```python
     c.SwarmSpawner.container_spec = {
-                  # The command to be run inside the service
+                  # The command to run inside the service
                   'command' : '/usr/local/bin/start-singleuser.sh', #(string or list) 
                   'Image' : 'YourImage',
                   'mounts' : mounts
@@ -129,7 +131,7 @@ You can also specify some resource for each service
 
 ```python
 c.SwarmSpawner.resource_spec = {
-                'cpu_limit' : 1, # (int) – CPU limit in units of 10^9 CPU shares.
+                'cpu_limit' : 1000, # (int) – CPU limit in units of 10^9 CPU shares.
                 'mem_limit' : int(512 * 1e6), # (int) – Memory limit in Bytes.
                 'cpu_reservation' : 1000, # (int) – CPU reservation in units of 10^9 CPU shares.
                 'mem_reservation' : int(512 * 1e6), # (int) – Memory reservation in Bytes
@@ -157,11 +159,11 @@ The spawner expect a dict with these keys:
 ```python
 user_options = {
   'container_spec' : {
-              'command' : '/usr/local/bin/start-singleuser.sh',   #(string or list) command to be run in the image.
+              'command' : '/usr/local/bin/start-singleuser.sh',   #(string or list) command to run in the image.
               'Image' : '', # name of the image
               'mounts' : mounts, # Same as jupyterhub_config 
   'resource_spec' : {
-              'cpu_limit' : 1, # (int) – CPU limit in units of 10^9 CPU shares.
+              'cpu_limit' : 1000, # (int) – CPU limit in units of 10^9 CPU shares.
               'mem_limit' : int(512 * 1e6),# (int) – Memory limit in Bytes.
               'cpu_reservation' : 1000, # (int) – CPU reservation in units of 10^9 CPU shares.
               'mem_reservation' : int(512 * 1e6), # (int) – Memory reservation in Bytes
@@ -189,6 +191,12 @@ In case of named servers (more than one server for user) `service_suffix` is the
 ### Downloading images
 Docker Engine in Swarm mode downloads images automatically from the repository.
 Either the image is available on the remote repository or locally, if not you will get an error. 
+
+Because before starting the service you have to complete the download of the image is better to have a longer timeout (default is 30 secs)
+
+ ```
+ c.SwarmSpawner.start_timeout = 60 * 5
+```       
 
 You can use all the docker images built for [JupyterHub](https://github.com/jupyter/docker-stacks).
 
