@@ -74,12 +74,12 @@ If you are using a specific image, well it's up to you to specify the right comm
 ```python
     c.SwarmSpawner.container_spec = {
                   # The command to run inside the service
-                  'command' : '/usr/local/bin/start-singleuser.sh', #(string or list) 
+                  #'command' : '/usr/local/bin/start-singleuser.sh', #(string or list) 
                   'Image' : 'YourImage',
                   'mounts' : mounts
           }
 ```
-
+__Is better to avoid running the service using `command` for this [issue](https://github.com/cassinyio/SwarmSpawner/issues/6)__
 
 ##### Bind a Host dir
 With mounts your are going to mount a local directory of the host inside the container.
