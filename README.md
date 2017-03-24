@@ -82,7 +82,7 @@ If you are using a specific image, well it's up to you to specify the right comm
 __Is better to avoid running the service using `command` for this [issue](https://github.com/cassinyio/SwarmSpawner/issues/6)__
 
 ##### Bind a Host dir
-With mounts your are going to mount a local directory of the host inside the container.
+With `'type':'bind'` you mount a local directory of the host inside the container.
 
 <u>Remember that source should exist in the node where you are creating the service.</u>
 
@@ -98,7 +98,7 @@ mounts = [{'type' : 'bind',
 ```
 
 ##### Mount a named volume
-With mounts your are going to mount a Docker Volume inside the container.
+With `'type':'volume'` you mount a Docker Volume inside the container.
 If the volume doesn't exist it will be created.
 
 ```python
@@ -107,7 +107,8 @@ mounts = [{'type' : 'volume',
            'target' : 'MountPointInsideTheContainer',}]
 ```
 
-For this type of volume you can also specify something like this:
+##### Named path
+For both types, volume and bind, you can specify a `{username}` inside the source:
 
 ```python
 mounts = [{'type' : 'volume',
