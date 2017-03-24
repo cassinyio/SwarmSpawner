@@ -54,29 +54,14 @@ class SwarmSpawner(Spawner):
     def client(self):
         """single global client instance"""
         cls = self.__class__
+
         if cls._client is None:
-            if self.use_docker_client_env:
-                kwargs = kwargs_from_env(
-                    assert_hostname=self.tls_assert_hostname
-                )
-                client = docker.APIClient(version='auto', **kwargs)
-            else:
-                if self.tls:
-                    tls_config = True
-                elif self.tls_verify or self.tls_ca or self.tls_client:
-                    tls_config = docker.tls.TLSConfig(
-                        client_cert=self.tls_client,
-                        ca_cert=self.tls_ca,
-                        verify=self.tls_verify,
-                        assert_hostname=self.tls_assert_hostname)
-                else:
-                    tls_config = None
+            kwargs = {}
+            if self.tls_config:
+                kwargs['tls'] = docker.tls.TLSConfig(**self.tls_config)
+            kwargs.update(kwargs_from_env())
+            client = docker.Client(version='auto', **kwargs)
 
-                docker_host = os.environ.get('DOCKER_HOST', 'unix://var/run/docker.sock')
-
-                client = docker.APIClient(base_url=docker_host,
-                                          tls=tls_config,
-                                          version='auto')
             cls._client = client
         return cls._client
 
@@ -94,25 +79,15 @@ class SwarmSpawner(Spawner):
         )
     )
 
-    use_docker_client_env = Bool(False, config=True,
-                                 help="If True, will use Docker client env \
-                                 variable (boot2docker friendly)")
-    tls = Bool(False, config=True, help="If True, connect to docker with --tls")
-    tls_verify = Bool(False, config=True, help="If True, connect to docker with --tlsverify")
-    tls_ca = Unicode("", config=True, help="Path to CA certificate for docker TLS")
-    tls_cert = Unicode("", config=True, help="Path to client certificate for docker TLS")
-    tls_key = Unicode("", config=True, help="Path to client key for docker TLS")
-    tls_assert_hostname = UnicodeOrFalse(default_value=None,
-                                         allow_none=True,
-                                         config=True,
-                                         help="If False, do not verify hostname of docker daemon",)
+    tls_config = Dict(config=True,
+        help="""Arguments to pass to docker TLS configuration.
+        Check for more info: http://docker-py.readthedocs.io/en/stable/tls.html
++        """
+)
 
     container_spec = Dict({}, config=True, help="Params to create the service")
     resource_spec = Dict({}, config=True, help="Params about cpu and memory limits")
     networks = List([], config=True, help="Additional args to create_host_config for service create")
-
-    _docker_safe_chars = set(string.ascii_letters + string.digits + '-')
-    _docker_escape_char = '_'
 
     use_user_options = Bool(False, config=True, help="the spawner will use the dict passed through the form or as json body when using the Hub Api")
     jupyterhub_service_name = Unicode(config=True,
@@ -299,7 +274,7 @@ class SwarmSpawner(Spawner):
             container_spec['mounts'] = []
             for mount in self.container_spec['mounts']:
                 m = dict(**mount)
-                if m['type'] == 'volume' and 'source' in m:
+                if 'source' in m:
                     m['source'] = m['source'].format(username=self.service_owner)
                 container_spec['mounts'].append(docker.types.Mount(**m))
 
