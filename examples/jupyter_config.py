@@ -32,7 +32,7 @@ mounts = [{'type' : 'volume',
 
 c.SwarmSpawner.container_spec = {
     # The command to run inside the service
-    'command' : '/usr/local/bin/start-singleuser.sh', #(string or list)
+    'args' : '/usr/local/bin/start-singleuser.sh', #(string or list)
     'Image' : 'YourImage',
     'mounts' : mounts
     }
