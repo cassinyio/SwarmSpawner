@@ -66,20 +66,27 @@ c.SwarmSpawner.networks = ["mynetwork"] #list of networks
 You can define *container_spec*, *resource_spec* and _networks_ within jupyterhub_config.py.
 
 #### [Container_spec](https://github.com/docker/docker-py/blob/master/docs/user_guides/swarm_services.md)
-'command' depends from the image that you are using.
-If you use one of the images from the Jupyter docker stack you need to specify a command: /usr/local/bin/start-singleuser.sh
+'command' and 'args' depends on the image that you are using.
+
+If you use one of the images from the Jupyter docker stack you need to specify args as: /usr/local/bin/start-singleuser.sh
 
 If you are using a specific image, well it's up to you to specify the right command.
 
 ```python
     c.SwarmSpawner.container_spec = {
                   # The command to run inside the service
-                  #'command' : '/usr/local/bin/start-singleuser.sh', #(string or list) 
+                  # 'args' : '/usr/local/bin/start-singleuser.sh', #(string or list)
                   'Image' : 'YourImage',
                   'mounts' : mounts
           }
 ```
-__Is better to avoid running the service using `command` for this [issue](https://github.com/cassinyio/SwarmSpawner/issues/6)__
+
+
+__Note:__ in a container spec, `args` sets the equivalent of CMD in the Dockerfile.
+`command` sets the equivalent of ENTRYPOINT.
+The notebook server itself should not be the ENTRYPOINT,
+so generally use `args`, not `command`, to specify how to launch the notebook server.
+See this [issue](https://github.com/cassinyio/SwarmSpawner/issues/6) for more info.
 
 ##### Bind a Host dir
 With mounts your are going to mount a local directory of the host inside the container.
@@ -159,7 +166,7 @@ The spawner expect a dict with these keys:
 ```python
 user_options = {
   'container_spec' : {
-              'command' : '/usr/local/bin/start-singleuser.sh',   #(string or list) command to run in the image.
+              'args' : ['/usr/local/bin/start-singleuser.sh'],   #(string or list) command to run in the image.
               'Image' : '', # name of the image
               'mounts' : mounts, # Same as jupyterhub_config 
   'resource_spec' : {
