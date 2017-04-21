@@ -75,7 +75,7 @@ If you are using a specific image, well it's up to you to specify the right comm
 ```python
     c.SwarmSpawner.container_spec = {
                   # The command to run inside the service
-                  # 'args' : '/usr/local/bin/start-singleuser.sh', #(string or list)
+                  # 'args' : ['/usr/local/bin/start-singleuser.sh'], # (list)
                   'Image' : 'YourImage',
                   'mounts' : mounts
           }
