@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """A setuptools based setup module.
 See:
 https://packaging.python.org/en/latest/distributing.html
@@ -16,7 +17,7 @@ import sys
 v = sys.version_info
 if v[:2] < (3,3):
     error = "SwarmSpawner requires Python version 3.3 or above."
-    print(error, file=sys.stderr)
+    print(error)
     sys.exit(1)
 
 here = path.abspath(path.dirname(__file__))
