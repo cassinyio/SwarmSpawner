@@ -321,7 +321,7 @@ class SwarmSpawner(Spawner):
             # Handle re-using API token.
             # Get the API token from the environment variables
             # of the running service:
-            for line in service['Config']['Env']:
+            for line in service['Spec']['TaskTemplate']['ContainerSpec']['Env']:
                 if line.startswith('JPY_API_TOKEN='):
                     self.api_token = line.split('=', 1)[1]
                     break
