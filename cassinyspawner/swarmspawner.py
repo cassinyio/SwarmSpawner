@@ -276,6 +276,9 @@ class SwarmSpawner(Spawner):
                 m = dict(**mount)
                 if 'source' in m:
                     m['source'] = m['source'].format(username=self.service_owner)
+                if 'driver_config' in m:
+                    m['driver_config']['options']['device'] = m['driver_config']['options']['device'].format(username=self.service_owner)
+                    m['driver_config'] = docker.types.DriverConfig(**m['driver_config'])
                 container_spec['mounts'].append(docker.types.Mount(**m))
 
             # some Envs are required by the single-user-image
