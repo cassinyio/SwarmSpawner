@@ -1,12 +1,8 @@
 # Configuration file for jupyterhub.
 
 import os
-import subprocess
-import os
-import errno
-import stat
 
-c = get_config()
+c = get_config() # noqa
 pwd = os.path.dirname(__file__)
 
 c.JupyterHub.spawner_class = 'cassinyspawner.SwarmSpawner'
@@ -26,20 +22,24 @@ c.SwarmSpawner.networks = ["jupyterhub"]
 notebook_dir = os.environ.get('NOTEBOOK_DIR') or '/home/jovyan/work'
 c.SwarmSpawner.notebook_dir = notebook_dir
 
-mounts = [{'type' : 'volume',
-           'source' : 'jupyterhub-user-{username}',
-           'target' : notebook_dir}]
+mounts = [{'type': 'volume',
+           'source': 'jupyterhub-user-{username}',
+           'target': notebook_dir}]
 
 c.SwarmSpawner.container_spec = {
     # The command to run inside the service
-    'args' : '/usr/local/bin/start-singleuser.sh', #(string or list)
-    'Image' : 'YourImage',
-    'mounts' : mounts
-    }
+    'args': '/usr/local/bin/start-singleuser.sh',  # (string or list)
+    'Image': 'YourImage',
+    'mounts': mounts
+}
 
 c.SwarmSpawner.resource_spec = {
-                'cpu_limit' : 1000, # (int) – CPU limit in units of 10^9 CPU shares.
-                'mem_limit' : int(512 * 1e6), # (int) – Memory limit in Bytes.
-                'cpu_reservation' : 1000, # (int) – CPU reservation in units of 10^9 CPU shares.
-                'mem_reservation' : int(512 * 1e6), # (int) – Memory reservation in Bytes
-                }
+    # (int) – CPU limit in units of 10^9 CPU shares.
+    'cpu_limit': int(1 * 1e9),
+    # (int) – Memory limit in Bytes.
+    'mem_limit': int(512 * 1e6),
+    # (int) – CPU reservation in units of 10^9 CPU shares.
+    'cpu_reservation': int(1 * 1e9),
+    # (int) – Memory reservation in bytes
+    'mem_reservation': int(512 * 1e6),
+}

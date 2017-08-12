@@ -3,8 +3,6 @@ A Spawner for JupyterHub that runs each user's
 server in a separate Docker Service
 """
 
-import os
-import string
 import hashlib
 from textwrap import dedent
 from concurrent.futures import ThreadPoolExecutor
@@ -78,20 +76,32 @@ class SwarmSpawner(Spawner):
             """
         )
     )
-
-    tls_config = Dict(config=True,
-        help="""Arguments to pass to docker TLS configuration.
-        Check for more info: http://docker-py.readthedocs.io/en/stable/tls.html
-+        """
-)
+    tls_config = Dict(
+        config=True,
+        help=dedent(
+            """Arguments to pass to docker TLS configuration.
+            Check for more info: http://docker-py.readthedocs.io/en/stable/tls.html
+            """
+        )
+    )
 
     container_spec = Dict({}, config=True, help="Params to create the service")
-    resource_spec = Dict({}, config=True, help="Params about cpu and memory limits")
-    networks = List([], config=True, help="Additional args to create_host_config for service create")
+    resource_spec = Dict(
+        {}, config=True, help="Params about cpu and memory limits")
 
-    use_user_options = Bool(False, config=True, help="the spawner will use the dict passed through the form or as json body when using the Hub Api")
+    networks = List([], config=True,
+                    help=dedent(
+                        """Additional args to create_host_config for service create
+                        """))
+    use_user_options = Bool(False, config=True,
+                            help=dedent(
+                                """the spawner will use the dict passed through the form
+                                or as json body when using the Hub Api
+                                """))
     jupyterhub_service_name = Unicode(config=True,
-                                      help=dedent("""Name of the service running the JupyterHub"""))
+                                      help=dedent(
+                                          """Name of the service running the JupyterHub
+                                          """))
 
     @property
     def tls_client(self):
@@ -129,7 +139,7 @@ class SwarmSpawner(Spawner):
         return "{}-{}-{}".format(self.service_prefix,
                                  self.service_owner,
                                  server_name
-                                )
+                                 )
 
     def load_state(self, state):
         super().load_state(state)
@@ -274,11 +284,19 @@ class SwarmSpawner(Spawner):
             container_spec['mounts'] = []
             for mount in self.container_spec['mounts']:
                 m = dict(**mount)
+
                 if 'source' in m:
-                    m['source'] = m['source'].format(username=self.service_owner)
+                    m['source'] = m['source'].format(
+                        username=self.service_owner)
+
                 if 'driver_config' in m:
-                    m['driver_config']['options']['device'] = m['driver_config']['options']['device'].format(username=self.service_owner)
-                    m['driver_config'] = docker.types.DriverConfig(**m['driver_config'])
+                    device = m['driver_config']['options']['device'].format(
+                        username=self.service_owner
+                    )
+                    m['driver_config']['options']['device'] = device
+                    m['driver_config'] = docker.types.DriverConfig(
+                        **m['driver_config'])
+
                 container_spec['mounts'].append(docker.types.Mount(**m))
 
             # some Envs are required by the single-user-image
@@ -297,7 +315,8 @@ class SwarmSpawner(Spawner):
             del container_spec['Image']
 
             # create the service
-            container_spec = docker.types.ContainerSpec(image, **container_spec)
+            container_spec = docker.types.ContainerSpec(
+                image, **container_spec)
             resources = docker.types.Resources(**resource_spec)
 
             task_spec = {'container_spec': container_spec,
@@ -324,7 +343,8 @@ class SwarmSpawner(Spawner):
             # Handle re-using API token.
             # Get the API token from the environment variables
             # of the running service:
-            for line in service['Spec']['TaskTemplate']['ContainerSpec']['Env']:
+            envs = service['Spec']['TaskTemplate']['ContainerSpec']['Env']
+            for line in envs:
                 if line.startswith('JPY_API_TOKEN='):
                     self.api_token = line.split('=', 1)[1]
                     break

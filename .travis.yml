@@ -1,0 +1,24 @@
+sudo: required
+
+language: python
+
+install:
+  - pip install -r requirements/tests.txt
+
+script:
+  - python setup.py check -rms
+  - flake8
+
+jobs:
+  include:
+    - stage: deploy
+      python: 3.6
+      deploy:
+        provider: pypi
+        user: barrachri
+        password:
+          secure: dLygTX1wVjlqkVsVBMbJAENxz6HguO0BIx2cWD7xLqvn+VzGzaocFLz3VvXBO2VElPtkuE4FfUVanRvMhUAu9luv3E2uxt7w5IEO2PhdMV7pkqrb+CZzyHwrKujZMJv8GQKXcEXsjLku2yVf+ZbXTYGiHJIIRsb3jMSbgbHGDOqZOrArAIpWkVDNLDJJWvci24RSVP1HcjrPfjjttzcPEXVWbRZkociDKnfQZeYNIqdO56U+QyFqJuc7TAMBssTIr3e3Fuy5jfkxWhyjo0Ne7RQ+VeE6w/RusRftJgNOcOzpPo90ZMGF8ZiRFPNSgl2ixZfcGjVEQA5w3YSi+FP5ZC39oF03ZAnNIg6HK4MfpsUmawnq605OiUl3PqQkyh6Oit3SwcJ6OmGTIFFkKlvuKFJxAmk6m+4my88zoD7HRqXxEUOFTEtBWz6XK/7XlJutTnflbCvkukxEbxrtWFxOlvabkygpMxx1KB4dt15jOLScQhI0fqebIDIJp4hsmWoRuWEQAfpNYb4oyM7BVe8bVpk0HpB8hw5x151zHREJvg2GPy11Oxg5Vu0CVDHnhQFvMbeOozHd65R37EojmMDXhfSJlCTOU/u1083XgV2INXWt9+pT7cfQymCOBLDScmPCBlby0/dnZahMc9zC+jQSi9/fafHQvxWWtORQ5vZ5QcE=
+        distributions: sdist bdist_wheel
+        on:
+          tags: true
+          all_branches: true
