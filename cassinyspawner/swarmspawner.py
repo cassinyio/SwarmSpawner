@@ -311,6 +311,11 @@ class SwarmSpawner(Spawner):
             if user_options.get('networks') is not None:
                 networks = user_options.get('networks')
 
+            if hasattr(self, 'placement'):
+                placement = self.placement
+            if user_options.get('placement') is not None:
+                placement = user_options.get('placement')
+
             image = container_spec['Image']
             del container_spec['Image']
 
@@ -321,7 +326,7 @@ class SwarmSpawner(Spawner):
 
             task_spec = {'container_spec': container_spec,
                          'resources': resources,
-                         'placement': user_options.get('placement')
+                         'placement': placement
                          }
             task_tmpl = docker.types.TaskTemplate(**task_spec)
 
