@@ -89,6 +89,11 @@ class SwarmSpawner(Spawner):
     resource_spec = Dict(
         {}, config=True, help="Params about cpu and memory limits")
 
+    placement = List([], config=True,
+                    help=dedent(
+                        """List of placement constraints into the swarm
+                        """))
+
     networks = List([], config=True,
                     help=dedent(
                         """Additional args to create_host_config for service create
