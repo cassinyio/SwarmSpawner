@@ -89,6 +89,11 @@ class SwarmSpawner(Spawner):
     resource_spec = Dict(
         {}, config=True, help="Params about cpu and memory limits")
 
+    placement = List([], config=True,
+                     help=dedent(
+                         """List of placement constraints into the swarm
+                         """))
+
     networks = List([], config=True,
                     help=dedent(
                         """Additional args to create_host_config for service create
@@ -311,6 +316,11 @@ class SwarmSpawner(Spawner):
             if user_options.get('networks') is not None:
                 networks = user_options.get('networks')
 
+            if hasattr(self, 'placement'):
+                placement = self.placement
+            if user_options.get('placement') is not None:
+                placement = user_options.get('placement')
+
             image = container_spec['Image']
             del container_spec['Image']
 
@@ -321,7 +331,7 @@ class SwarmSpawner(Spawner):
 
             task_spec = {'container_spec': container_spec,
                          'resources': resources,
-                         'placement': user_options.get('placement')
+                         'placement': placement
                          }
             task_tmpl = docker.types.TaskTemplate(**task_spec)
 
