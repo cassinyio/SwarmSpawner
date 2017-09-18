@@ -211,22 +211,24 @@ class SwarmSpawner(Spawner):
 
         task_filter = {'service': service['Spec']['Name']}
 
-        task = yield self.docker(
+        tasks = yield self.docker(
             'tasks', task_filter
         )
 
-        # use the first and only task
-        task = task[0]
+        running_task = None
+        for task in tasks:
+            task_state = task['Status']['State']
+            self.log.debug(
+                "Task %s of Docker service %s status: %s",
+                task['ID'][:7],
+                self.service_id[:7],
+                pformat(task_state),
+            )
+            if task_state == 'running':
+                # there should be at most one running task
+                running_task = task
 
-        task_state = task['Status']['State']
-        self.log.debug(
-            "Task %s of Docker service %s status: %s",
-            task['ID'][:7],
-            self.service_id[:7],
-            pformat(task_state),
-        )
-
-        if task_state == 'running':
+        if running_task is not None:
             return None
         else:
             return 1
