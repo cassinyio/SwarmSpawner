@@ -1,3 +1,6 @@
 docutils
 pygments
 flake8
+requests
+pytest
+docker

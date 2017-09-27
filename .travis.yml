@@ -1,13 +1,22 @@
 sudo: required
 
+services:
+    docker
+
 language: python
+
+python:
+    "3.6"
 
 install:
   - pip install -r requirements/tests.txt
+  - docker pull jupyterhub/jupyterhub:0.8.0rc2
+  - docker pull jupyterhub/singleuser:0.8
 
 script:
   - python setup.py check -rms
   - flake8
+  - pytest -v tests/
 
 jobs:
   include:
