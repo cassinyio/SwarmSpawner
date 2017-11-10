@@ -1,4 +1,8 @@
 ==============================
+This project is deprecated, please check `DockerSpawner <https://github.com/jupyterhub/dockerspawner>`_.
+==============================
+
+==============================
 SwarmSpawner
 ==============================
 
