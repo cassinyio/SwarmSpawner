@@ -268,7 +268,7 @@ class SwarmSpawner(Spawner):
         else:
             user_options = {}
 
-        self.log.warn("user_options: ".format(user_options))
+        self.log.warn("user_options: {}".format(user_options))
 
         service = yield self.get_service()
 
