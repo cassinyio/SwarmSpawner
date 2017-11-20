@@ -91,7 +91,8 @@ class SwarmSpawner(Spawner):
 
     placement = List([], config=True,
                      help=dedent(
-                         """List of placement constraints into the swarm
+                         """"List of placement constraints into the swarm
+
                          """))
 
     networks = List([], config=True,
@@ -282,7 +283,7 @@ class SwarmSpawner(Spawner):
             if hasattr(self, 'container_spec') and self.container_spec is not None:
                 container_spec = dict(**self.container_spec)
             elif user_options == {}:
-                raise("A container_spec is needed in to create a service")
+                raise ("A container_spec is needed in to create a service")
 
             container_spec.update(user_options.get('container_spec', {}))
 
@@ -297,10 +298,16 @@ class SwarmSpawner(Spawner):
                         username=self.service_owner)
 
                 if 'driver_config' in m:
-                    device = m['driver_config']['options']['device'].format(
-                        username=self.service_owner
-                    )
-                    m['driver_config']['options']['device'] = device
+                    driver = m['driver_config']['name']
+                    if driver == 'local-persist':
+                        device = m['driver_config']['options']['mountpoint'].format(
+                            username=self.service_owner)
+                        m['driver_config']['options']['mountpoint'] = device
+                    else:
+                        device = m['driver_config']['options']['device'].format(
+                            username=self.service_owner)
+                        m['driver_config']['options']['device'] = device
+
                     m['driver_config'] = docker.types.DriverConfig(
                         **m['driver_config'])
 
